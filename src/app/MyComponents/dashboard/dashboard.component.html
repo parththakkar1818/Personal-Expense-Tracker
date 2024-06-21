@@ -1,0 +1,48 @@
+<!-- dashboard.component.html -->
+<div>
+  <h2>Expense Dashboard</h2>
+  <div *ngIf="this.expenses.length === 0; else elseBlock">
+    No Expenses to display
+  </div>
+  <ng-template #elseBlock>
+    <div>
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Description</th>
+              <th>Cost</th>
+              <th>Categories</th>
+              <th>Payment Via</th>
+              <th>Shop Name</th>
+              <th>Shop Address</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let expense of expenses; let i = index">
+              <td>{{ expense.itemName }}</td>
+              <td>{{ expense.description }}</td>
+              <td>{{ expense.cost }}</td>
+              <td>
+                <ul>
+                  <li *ngFor="let category of expense.categories">
+                    {{ category }}
+                  </li>
+                </ul>
+              </td>
+              <td>{{ expense.paymentVia ? "Online" : "Offline" }}</td>
+              <td>{{ expense.shopDetails.shopName }}</td>
+              <td>{{ expense.shopDetails.shopAddress }}</td>
+              <td>
+                <button (click)="deleteExpense(i)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <app-analysis></app-analysis>
+    </div>
+  </ng-template>
+</div>

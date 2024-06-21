@@ -1,1 +1,43 @@
-<p>form works!</p>
+<!-- form.component.html -->
+<div>
+  <form (ngSubmit)="onSubmit()">
+    <!-- Name -->
+    <label for="itemName">Item Name: </label>
+    <input [(ngModel)]="itemName" id="itemName" name="itemName" type="text" required />
+
+    <!-- Description -->
+    <label for="description">Description: </label>
+    <textarea [(ngModel)]="description" id="description" name="description" required></textarea>
+
+    <!-- Cost -->
+    <label for="cost">Cost: </label>
+    <input [(ngModel)]="cost" id="cost" name="cost" type="number" step="0.01" required />
+
+    <!-- Category -->
+    <label>Category: </label>
+    <div id="category">
+      <div *ngFor="let category of categories; let i = index">
+        <input class="categoryItem" [id]="category.value" type="checkbox" (change)="onCategoryChange($event, category.value)" />
+        <label [for]="category.value">{{ category.name }}</label>
+      </div>
+    </div>
+
+    <!-- PaymentMode -->
+    <label for="paymentMode">Payment via: </label>
+    <div class="payment-mode">
+      <input id="online" type="radio" name="paymentMode" [(ngModel)]="paymentVia" value="online" />
+      <label for="online">Online</label>
+      <input id="offline" type="radio" name="paymentMode" [(ngModel)]="paymentVia" value="offline" />
+      <label for="offline">Offline</label>
+    </div>
+
+    <!-- Shop Details -->
+    <label for="shopName">Shop Name: </label>
+    <input [(ngModel)]="shopDetails.shopName" id="shopName" name="shopName" type="text" required />
+    <label for="shopAddress">Shop Address: </label>
+    <textarea [(ngModel)]="shopDetails.shopAddress" id="shopAddress" name="shopAddress" required></textarea>
+    
+    <!-- Submit Button -->
+    <button type="submit">Submit</button>
+  </form>
+</div>

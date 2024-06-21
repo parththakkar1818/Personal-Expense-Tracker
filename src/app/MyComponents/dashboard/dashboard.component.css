@@ -1,0 +1,58 @@
+/* dashboard.component.css */
+
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f8f8;
+    
+  }
+  
+.table{
+    background-color: rgb(216, 226, 255);
+    padding: 5px;
+}
+  /* Table header styling */
+  th, td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Table row hover effect */
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Styling for buttons */
+  button {
+    background-color: #ff4d4d; /* Red background */
+    color: white; /* White text */
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  button:hover {
+    background-color: #ff1a1a; /* Darker red on hover */
+  }
+  
+  /* Unordered list in table */
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    margin: 0;
+  }
+  
