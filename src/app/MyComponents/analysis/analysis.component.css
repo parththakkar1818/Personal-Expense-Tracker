@@ -1,0 +1,19 @@
+.piechart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .chart-container {
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+  }
+  
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  

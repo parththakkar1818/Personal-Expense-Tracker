@@ -1,35 +1,34 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ExpenseItem } from '../../ExpenseItem';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+
+
 
 @Component({
   selector: 'app-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './form.component.html',
-  styleUrls: ['./form.component.css']
+  styleUrls: ['./form.component.css'],
 })
 export class FormComponent {
-
-  
-
-  
-  itemName: string="";
-  description: string = "";
+  itemName: string = '';
+  description: string = '';
   cost: number = 0;
   selectedCategories: Array<string> = [];
   paymentVia: boolean = false;
-  shopDetails= {
-    shopName: "",
-    shopAddress: ""
-  }
+  shopDetails = {
+    shopName: '',
+    shopAddress: '',
+  };
 
   localItem: string | null = null;
   expenses: ExpenseItem[] = [];
+  editingIndex: number | null = null;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private route: ActivatedRoute) {
     // router= new Router();
     this.localItem = this.getLocalStorageItem('Expenses');
     if (this.localItem === null || this.localItem.trim() === '') {
@@ -39,19 +38,19 @@ export class FormComponent {
     }
   }
 
-  
-
   categories = [
     { name: 'Grocery', value: 'grocery' },
     { name: 'Personal', value: 'personal' },
     { name: 'Electronics', value: 'electronics' },
     { name: 'Clothing', value: 'clothing' },
-    { name: 'Other', value: 'other' }
+    { name: 'Other', value: 'other' },
   ];
 
   onCategoryChange(event: any, category: string) {
     if (event.target.checked) {
-      this.selectedCategories.push(category);
+      if(!this.selectedCategories.includes(category)){
+        this.selectedCategories.push(category);
+      }
     } else {
       const index = this.selectedCategories.indexOf(category);
       if (index > -1) {
@@ -69,17 +68,54 @@ export class FormComponent {
       paymentVia: this.paymentVia,
       shopDetails: this.shopDetails,
     };
-    console.log('Form Data:', formData);
-    this.addExpense(formData);
+
+    if (this.editingIndex !== null) {
+      // Update existing expense
+      this.expenses[this.editingIndex] = formData;
+    } else {
+      // Add new expense
+      this.expenses.push(formData);
+    }
+
+    this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
     this.router.navigate(['/']);
 
+
+    // console.log('Form Data:', formData);
+    // this.addExpense(formData);
+    // this.router.navigate(['/']);
   }
 
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      console.log("params: ",params)
+      if (params['itemName']) {
+        this.itemName = params['itemName'];
+        this.description = params['description'];
+        this.cost = +params['cost'];
+        this.selectedCategories = params['categories'];
+        this.selectedCategories.forEach(category => {
+          console.log("in loop: ",category);
+          const checkbox = document.getElementById(category) as HTMLInputElement;
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+          else{
+            console.log("No checkbox found");
+          }
+        
+        });
+        this.paymentVia = params['paymentVia'] === true;
+        this.shopDetails = {
+          shopName: params['shopName'],
+          shopAddress: params['shopAddress']
+        };
+        this.editingIndex = +params['index'];
+      }
+      console.log("from here:",this.selectedCategories);
+    });
+  }
 
-
-  
-
-  
   
 
   setLocalStorageItem(key: string, value: string): void {
@@ -93,13 +129,11 @@ export class FormComponent {
     }
     return null;
   }
-  
+
   addExpense(expense: ExpenseItem) {
-    console.log("from Home: ",expense);
+    console.log('from Home: ', expense);
     this.expenses.push(expense);
     this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
     console.log('updated ls');
   }
-
-  
 }

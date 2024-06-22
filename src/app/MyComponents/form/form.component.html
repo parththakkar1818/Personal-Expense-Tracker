@@ -17,7 +17,7 @@
     <label>Category: </label>
     <div id="category">
       <div *ngFor="let category of categories; let i = index">
-        <input class="categoryItem" [id]="category.value" type="checkbox" (change)="onCategoryChange($event, category.value)" />
+        <input class="categoryItem" id="category.value" type="checkbox" (change)="onCategoryChange($event, category.value)" />
         <label [for]="category.value">{{ category.name }}</label>
       </div>
     </div>
