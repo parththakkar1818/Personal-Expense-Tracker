@@ -34,7 +34,8 @@ export class DashboardComponent {
       (acc, current) => acc + current.cost,
       0
     );
-    this.averageCost = this.totalCost / this.expenses.length;
+    this.averageCost = (this.totalCost / this.expenses.length);
+    this.averageCost.toFixed(2);
   }
 
   setLocalStorageItem(key: string, value: string): void {

@@ -3,8 +3,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ExpenseItem } from '../../ExpenseItem';
 import { ActivatedRoute, Router } from '@angular/router';
-
-
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-form',
@@ -14,30 +13,11 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./form.component.css'],
 })
 export class FormComponent {
-  itemName: string = '';
-  description: string = '';
-  cost: number = 0;
-  selectedCategories: Array<string> = [];
-  paymentVia: boolean = false;
-  shopDetails = {
-    shopName: '',
-    shopAddress: '',
-  };
-
   localItem: string | null = null;
   expenses: ExpenseItem[] = [];
   editingIndex: number | null = null;
-
-  constructor(private router: Router, private route: ActivatedRoute) {
-    // router= new Router();
-    this.localItem = this.getLocalStorageItem('Expenses');
-    if (this.localItem === null || this.localItem.trim() === '') {
-      this.expenses = [];
-    } else {
-      this.expenses = JSON.parse(this.localItem);
-    }
-  }
-
+  expenseForm: FormGroup;
+  selectedCategories: Array<string> = [];
   categories = [
     { name: 'Grocery', value: 'grocery' },
     { name: 'Personal', value: 'personal' },
@@ -45,10 +25,34 @@ export class FormComponent {
     { name: 'Clothing', value: 'clothing' },
     { name: 'Other', value: 'other' },
   ];
+  isSubmitButtonPressed: boolean = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    // router= new Router();
+    this.localItem = this.getLocalStorageItem('Expenses');
+    if (this.localItem === null || this.localItem.trim() === '') {
+      this.expenses = [];
+    } else {
+      this.expenses = JSON.parse(this.localItem);
+    }
+    this.expenseForm = this.fb.group({
+      itemName: ['', Validators.required],
+      description: ['', Validators.required],
+      cost: [0, [Validators.required, Validators.min(0.01)]],
+      categories: ['', Validators.required],
+      paymentVia: [false, Validators.required],
+      shopName: ['', Validators.required],
+      shopAddress: ['', Validators.required],
+    });
+  }
 
   onCategoryChange(event: any, category: string) {
     if (event.target.checked) {
-      if(!this.selectedCategories.includes(category)){
+      if (!this.selectedCategories.includes(category)) {
         this.selectedCategories.push(category);
       }
     } else {
@@ -60,63 +64,65 @@ export class FormComponent {
   }
 
   onSubmit() {
-    const formData = {
-      itemName: this.itemName,
-      description: this.description,
-      cost: this.cost,
-      categories: this.selectedCategories,
-      paymentVia: this.paymentVia,
-      shopDetails: this.shopDetails,
-    };
-
-    if (this.editingIndex !== null) {
-      // Update existing expense
-      this.expenses[this.editingIndex] = formData;
+    this.isSubmitButtonPressed = true;
+    console.log(this.isSubmitButtonPressed)
+    if (this.selectedCategories.length === 0) {
+      this.expenseForm.get('categories')?.setErrors({ required: true });
     } else {
-      // Add new expense
-      this.expenses.push(formData);
+      this.expenseForm.get('categories')?.setErrors(null);
     }
+    this.expenseForm.markAllAsTouched(); // This will ensure that all form controls are marked as touched
 
-    this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
-    this.router.navigate(['/']);
+    if (this.expenseForm.valid) {
+      const formData: ExpenseItem = {
+        itemName: this.expenseForm.value.itemName,
+        description: this.expenseForm.value.description,
+        cost: this.expenseForm.value.cost,
+        categories: this.selectedCategories,
+        paymentVia: this.expenseForm.value.paymentVia,
+        shopDetails: {
+          shopName: this.expenseForm.value.shopName,
+          shopAddress: this.expenseForm.value.shopAddress,
+        },
+      };
 
+      if (this.editingIndex !== null) {
+        // Update existing expense
+        this.expenses[this.editingIndex] = formData;
+      } else {
+        // Add new expense
+        this.expenses.push(formData);
+      }
 
-    // console.log('Form Data:', formData);
-    // this.addExpense(formData);
-    // this.router.navigate(['/']);
+      this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
+      this.router.navigate(['/']);
+    }
+    else{
+      console.log("Data not valid");
+    }
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      console.log("params: ",params)
+    this.isSubmitButtonPressed = false;
+    this.route.queryParams.subscribe((params) => {
       if (params['itemName']) {
-        this.itemName = params['itemName'];
-        this.description = params['description'];
-        this.cost = +params['cost'];
-        this.selectedCategories = params['categories'];
-        this.selectedCategories.forEach(category => {
-          console.log("in loop: ",category);
-          const checkbox = document.getElementById(category) as HTMLInputElement;
-          if (checkbox) {
-            checkbox.checked = true;
-          }
-          else{
-            console.log("No checkbox found");
-          }
-        
-        });
-        this.paymentVia = params['paymentVia'] === true;
-        this.shopDetails = {
+        this.expenseForm.patchValue({
+          itemName: params['itemName'],
+          description: params['description'],
+          cost: +params['cost'],
+          paymentVia: params['paymentVia'] === 'true',
           shopName: params['shopName'],
-          shopAddress: params['shopAddress']
-        };
+          shopAddress: params['shopAddress'],
+        });
+
+        this.selectedCategories = params['categories'] || [];
+        console.log("selected category: ",this.selectedCategories)
         this.editingIndex = +params['index'];
+        console.log(this.expenseForm.value.paymentVia);
+
       }
-      console.log("from here:",this.selectedCategories);
     });
   }
-
-  
 
   setLocalStorageItem(key: string, value: string): void {
     if (typeof window !== 'undefined') {

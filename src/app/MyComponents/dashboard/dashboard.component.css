@@ -13,7 +13,7 @@ table {
   
 .table{
     background-color: rgb(216, 226, 255);
-    padding: 5px;
+    padding: 5px 10px;
 }
   /* Table header styling */
   th, td {

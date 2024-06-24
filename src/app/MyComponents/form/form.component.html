@@ -1,43 +1,119 @@
-<!-- form.component.html -->
 <div>
-  <form (ngSubmit)="onSubmit()">
+  <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
     <!-- Name -->
     <label for="itemName">Item Name: </label>
-    <input [(ngModel)]="itemName" id="itemName" name="itemName" type="text" required />
+    <input formControlName="itemName" id="itemName" type="text" />
+    <div
+      *ngIf="
+        expenseForm.get('itemName')?.touched &&
+        expenseForm.get('itemName')?.invalid
+      "
+    >
+      <small *ngIf="expenseForm.get('itemName')?.errors?.['required']"
+        >Item Name is required.</small
+      >
+    </div>
 
     <!-- Description -->
     <label for="description">Description: </label>
-    <textarea [(ngModel)]="description" id="description" name="description" required></textarea>
+    <textarea formControlName="description" id="description"></textarea>
+    <div
+      *ngIf="
+        expenseForm.get('description')?.touched &&
+        expenseForm.get('description')?.invalid
+      "
+    >
+      <small *ngIf="expenseForm.get('description')?.errors?.['required']"
+        >Description is required.</small
+      >
+    </div>
 
     <!-- Cost -->
     <label for="cost">Cost: </label>
-    <input [(ngModel)]="cost" id="cost" name="cost" type="number" step="0.01" required />
+    <input formControlName="cost" id="cost" type="number" step="0.01" />
+    <div
+      *ngIf="
+        expenseForm.get('cost')?.touched && expenseForm.get('cost')?.invalid
+      "
+    >
+      <small *ngIf="expenseForm.get('cost')?.errors?.['required']"
+        >Cost is required.</small
+      >
+      <small *ngIf="expenseForm.get('cost')?.errors?.['min']"
+        >Cost must be greater than 0.</small
+      >
+    </div>
 
     <!-- Category -->
     <label>Category: </label>
     <div id="category">
       <div *ngFor="let category of categories; let i = index">
-        <input class="categoryItem" id="category.value" type="checkbox" (change)="onCategoryChange($event, category.value)" />
+        <input
+          formControlName="categories"
+          id="{{ category.value }}"
+          type="checkbox"
+          (change)="onCategoryChange($event, category.value)"
+        />
         <label [for]="category.value">{{ category.name }}</label>
+      </div>
+      <div
+        *ngIf="
+          expenseForm.get('categories')?.touched && !selectedCategories.length
+        "
+      >
+        <small>At least one category must be selected.</small>
       </div>
     </div>
 
     <!-- PaymentMode -->
     <label for="paymentMode">Payment via: </label>
     <div class="payment-mode">
-      <input id="online" type="radio" name="paymentMode" [(ngModel)]="paymentVia" value="online" />
+      <input
+        id="online"
+        type="radio"
+        formControlName="paymentVia"
+        value="true"
+        [checked]=true
+        
+      />
       <label for="online">Online</label>
-      <input id="offline" type="radio" name="paymentMode" [(ngModel)]="paymentVia" value="offline" />
+      <input
+        id="offline"
+        type="radio"
+        formControlName="paymentVia"
+        value="false"
+        [checked]=true
+      />
       <label for="offline">Offline</label>
     </div>
 
     <!-- Shop Details -->
     <label for="shopName">Shop Name: </label>
-    <input [(ngModel)]="shopDetails.shopName" id="shopName" name="shopName" type="text" required />
+    <input formControlName="shopName" id="shopName" type="text" />
+    <div
+      *ngIf="
+        expenseForm.get('shopName')?.touched &&
+        expenseForm.get('shopName')?.invalid
+      "
+    >
+      <small *ngIf="expenseForm.get('shopName')?.errors?.['required']"
+        >Shop Name is required.</small
+      >
+    </div>
     <label for="shopAddress">Shop Address: </label>
-    <textarea [(ngModel)]="shopDetails.shopAddress" id="shopAddress" name="shopAddress" required></textarea>
-    
+    <textarea formControlName="shopAddress" id="shopAddress"></textarea>
+    <div
+      *ngIf="
+        expenseForm.get('shopAddress')?.touched &&
+        expenseForm.get('shopAddress')?.invalid
+      "
+    >
+      <small *ngIf="expenseForm.get('shopAddress')?.errors?.['required']"
+        >Shop Address is required.</small
+      >
+    </div>
+
     <!-- Submit Button -->
-    <button type="submit">Submit</button>
+    <button type="submit" [disabled]="expenseForm.invalid">Submit</button>
   </form>
 </div>
