@@ -16,6 +16,7 @@ export class DashboardComponent {
   expenses: ExpenseItem[] = [];
   totalCost: number = 0;
   averageCost: number = 0;
+  sortDirection: boolean = true;
   @Output() expensesUpdated: EventEmitter<ExpenseItem[]> = new EventEmitter();
 
   constructor(private router: Router) {
@@ -69,5 +70,16 @@ export class DashboardComponent {
         index: i,
       },
     });
+  }
+
+  sortExpensesByCost() {
+    this.expenses = this.expenses.sort((a, b) => {
+      if (this.sortDirection) {
+        return a.cost - b.cost;
+      } else {
+        return b.cost - a.cost;
+      }
+    });
+    this.sortDirection = !this.sortDirection;
   }
 }

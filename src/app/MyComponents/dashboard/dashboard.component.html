@@ -11,12 +11,25 @@
             <tr>
               <th>Item Name</th>
               <th>Description</th>
-              <th>Cost</th>
+              <th>
+                Cost
+                <i
+                  *ngIf="sortDirection; else downArrow"
+                  class="fa-solid fa-arrow-up-wide-short"
+                  (click)="sortExpensesByCost()"
+                ></i>
+                <ng-template #downArrow>
+                  <i
+                    class="fa-solid fa-arrow-down-short-wide"
+                    (click)="sortExpensesByCost()"
+                  ></i>
+                </ng-template>
+              </th>
               <th>Categories</th>
               <th>Payment Via</th>
               <th>Shop Name</th>
               <th>Shop Address</th>
-              <th>Actions</th>
+              <th colspan="2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -40,7 +53,8 @@
               <td>
                 <button (click)="deleteExpense(i)">Delete</button>
               </td>
-              
+            </tr>
+
             <tr>
               <!-- <td colspan="2"></td> -->
               <td colspan="5">
