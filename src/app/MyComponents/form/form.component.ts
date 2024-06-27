@@ -98,7 +98,7 @@ export class FormComponent {
 
   onSubmit() {
     this.isSubmitButtonPressed = true;
-    console.log(this.isSubmitButtonPressed);
+    // console.log(this.isSubmitButtonPressed);
     if (this.selectedCategories.length === 0) {
       this.expenseForm.get('categories')?.setErrors({ required: true });
     } else {
@@ -162,6 +162,17 @@ export class FormComponent {
         console.log('selected category: ', this.selectedCategories);
         this.editingIndex = +params['index'];
         console.log(this.expenseForm.value.paymentVia);
+      }
+      else{
+        this.expenseForm = this.fb.group({
+          itemName: ['', Validators.required],
+          description: ['', Validators.required],
+          cost: [0, [Validators.required, Validators.min(0.01)]],
+          categories: ['', Validators.required],
+          paymentVia: [false, Validators.required],
+          shopName: ['', Validators.required],
+          shopAddress: ['', Validators.required],
+        });
       }
     });
   }
