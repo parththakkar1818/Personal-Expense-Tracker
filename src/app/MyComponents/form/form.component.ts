@@ -3,7 +3,13 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ExpenseItem } from '../../ExpenseItem';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormArray,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-form',
@@ -14,7 +20,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class FormComponent {
   localItem: string | null = null;
+  cookiesItem: string | null = null;
+
   expenses: ExpenseItem[] = [];
+  expensesLocalStorage: ExpenseItem[] = [];
+  expensesCookies: ExpenseItem[] = [];
   editingIndex: number | null = null;
   expenseForm: FormGroup;
   selectedCategories: Array<string> = [];
@@ -32,13 +42,36 @@ export class FormComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    // router= new Router();
     this.localItem = this.getLocalStorageItem('Expenses');
-    if (this.localItem === null || this.localItem.trim() === '') {
-      this.expenses = [];
+    this.cookiesItem = this.getCookieItem('Expenses');
+
+    if (this.localItem !== null && this.localItem.trim() !== '') {
+      this.expensesLocalStorage = JSON.parse(this.localItem);
     } else {
-      this.expenses = JSON.parse(this.localItem);
+      console.log('nothing found in localstorage');
     }
+
+    if (this.cookiesItem !== null && this.cookiesItem.trim() !== '') {
+      this.expensesCookies = JSON.parse(this.cookiesItem);
+    } else {
+      console.log('nothing found in cookies');
+    }
+
+    // Merge expenses alternatively
+    let maxLength = Math.max(
+      this.expensesLocalStorage.length,
+      this.expensesCookies.length
+    );
+    for (let i = 0; i < maxLength; i++) {
+      if (i < this.expensesLocalStorage.length) {
+        this.expenses.push(this.expensesLocalStorage[i]);
+      }
+      if (i < this.expensesCookies.length) {
+        this.expenses.push(this.expensesCookies[i]);
+      }
+    }
+    // console.log("from line 69: ",this.expenses);
+
     this.expenseForm = this.fb.group({
       itemName: ['', Validators.required],
       description: ['', Validators.required],
@@ -65,7 +98,7 @@ export class FormComponent {
 
   onSubmit() {
     this.isSubmitButtonPressed = true;
-    console.log(this.isSubmitButtonPressed)
+    console.log(this.isSubmitButtonPressed);
     if (this.selectedCategories.length === 0) {
       this.expenseForm.get('categories')?.setErrors({ required: true });
     } else {
@@ -90,15 +123,25 @@ export class FormComponent {
         // Update existing expense
         this.expenses[this.editingIndex] = formData;
       } else {
-        // Add new expense
         this.expenses.push(formData);
+
+        if (this.expenses.length % 2 === 1) {
+          console.log('Storing in localStorage');
+          this.expensesLocalStorage.push(formData);
+          this.setLocalStorageItem(
+            'Expenses',
+            JSON.stringify(this.expensesLocalStorage)
+          );
+        } else {
+          console.log('Storing in cookies');
+          this.expensesCookies.push(formData);
+          this.setCookieItem('Expenses', JSON.stringify(this.expensesCookies));
+        }
       }
 
-      this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
       this.router.navigate(['/']);
-    }
-    else{
-      console.log("Data not valid");
+    } else {
+      console.log('Data not valid');
     }
   }
 
@@ -116,10 +159,9 @@ export class FormComponent {
         });
 
         this.selectedCategories = params['categories'] || [];
-        console.log("selected category: ",this.selectedCategories)
+        console.log('selected category: ', this.selectedCategories);
         this.editingIndex = +params['index'];
         console.log(this.expenseForm.value.paymentVia);
-
       }
     });
   }
@@ -129,6 +171,7 @@ export class FormComponent {
       localStorage.setItem(key, value);
     }
   }
+
   getLocalStorageItem(key: string): string | null {
     if (typeof window !== 'undefined') {
       return localStorage.getItem(key);
@@ -136,10 +179,30 @@ export class FormComponent {
     return null;
   }
 
+  setCookieItem(key: string, value: string): void {
+    if (typeof document !== 'undefined') {
+      document.cookie = `${key}=${value}; path=/;`;
+    }
+  }
+
+  getCookieItem(key: string): string | null {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split('; ');
+      const cookie = cookies.find((cookie) => cookie.startsWith(`${key}=`));
+      if (cookie) {
+        // console.log('cookie value found..');
+        // console.log(JSON.parse(cookie.split('=')[1]));
+        return cookie.split('=')[1];
+      }
+    }
+    // console.log('no cookie found');
+    return null;
+  }
+
   addExpense(expense: ExpenseItem) {
-    console.log('from Home: ', expense);
+    // console.log('from Home: ', expense);
     this.expenses.push(expense);
     this.setLocalStorageItem('Expenses', JSON.stringify(this.expenses));
-    console.log('updated ls');
+    // console.log('updated ls');
   }
 }

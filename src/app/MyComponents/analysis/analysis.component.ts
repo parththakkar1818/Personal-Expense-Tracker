@@ -10,7 +10,7 @@ import { ExpenseItem } from '../../ExpenseItem';
 })
 export class AnalysisComponent implements OnChanges {
   @Input() expenses: ExpenseItem[] = [];
-  // @Input() expenses: ExpenseItem[] = [];
+  @Input() myName: ExpenseItem[] = [];
   
   public chart: any;
 
